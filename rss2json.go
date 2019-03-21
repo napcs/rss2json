@@ -9,7 +9,7 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-const AppVersion = "0.1.0"
+const appVersion = "0.1.0"
 
 func main() {
 	version := flag.Bool("v", false, "Display the current version")
@@ -26,13 +26,12 @@ func main() {
 
 	// version flag. print and exit
 	if *version {
-		fmt.Println(AppVersion)
+		fmt.Println(appVersion)
 		os.Exit(0)
 	}
 
 	// check if no options passed at all
-	args := os.Args[1:]
-	if len(args) == 0 {
+	if len(flag.Args()) == 0 {
 		fmt.Println("Please specify a URL to an RSS feed")
 		os.Exit(1)
 	}
@@ -41,30 +40,38 @@ func main() {
 	url := flag.Args()[0]
 
 	// convert
-	convert(url, prettyprint)
+	if err := convert(url, *prettyprint); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
 
-func convert(url string, prettyprint *bool) {
-	feed := fetchRSS(url)
-	fmt.Println(convertToJson(feed, prettyprint))
+func convert(url string, prettyprint bool) error {
+	feed, err := fetchRSS(url)
+	if err != nil {
+		return err
+	}
+	result, err := convertToJson(feed, prettyprint)
+	if err != nil {
+		return err
+	}
+	fmt.Println(result)
+	return nil
 }
 
-func fetchRSS(url string) *gofeed.Feed {
+func fetchRSS(url string) (*gofeed.Feed, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(url)
-	if err != nil {
-		panic(err)
-	}
-	return feed
+	return feed, err
 }
 
-func convertToJson(feed *gofeed.Feed, prettyprint *bool) string {
+func convertToJson(feed *gofeed.Feed, prettyprint bool) (string, error) {
 
-	if *prettyprint {
-		results, _ := json.MarshalIndent(feed, "", "  ")
-		return string(results)
-	} else {
-		results, _ := json.Marshal(feed)
-		return string(results)
+	if prettyprint {
+		results, err := json.MarshalIndent(feed, "", "  ")
+		return string(results), err
 	}
+
+	results, err := json.Marshal(feed)
+	return string(results), err
 }
