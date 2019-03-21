@@ -4,8 +4,10 @@ Command line utility to convert RSS feeds to JSON.
 
 ## Usage
 
+Pass the URL to your RSS feed and save the result to a file using shell redirection.
+
 ```
-$ rss2json https://example.com/rss/
+$ rss2json https://example.com/rss/ > out.json
 ```
 
 Use the `-p` switch to pretty-print the output.
@@ -15,15 +17,27 @@ Use the `-p` switch to pretty-print the output.
 
 To install, download the latest release to your system and copy the executable to a location on your path. 
 
-## Roadmap
+Alternatively, clone the repository and build the version you need from source with
 
-* Refactoring. This code is a mess.
-* A "no persist" mode - changes are accepted but not saved to the JSON file.
+```
+$ make windows mac linux
+```
 
 ## Contributing
 
-Please contribute.
+Please contribute. Clone this repo. Install the go-feed library:
 
+```
+$ go get github.com/mmcdole/gofeed
+```
+
+Then make your changes. Build the packages with 
+
+```
+$ make windows mac linux
+```
+
+Test them on those operating systems, and then send in a PR.
 
 ## History
 

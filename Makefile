@@ -1,4 +1,4 @@
-version = $(go run rss2json -v)
+version = 0.1.0
 
 mac:
 	mkdir -p dist/mac
