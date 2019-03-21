@@ -40,30 +40,38 @@ func main() {
 	url := flag.Args()[0]
 
 	// convert
-	convert(url, *prettyprint)
+	if err := convert(url, *prettyprint); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
 
-func convert(url string, prettyprint bool) {
-	feed := fetchRSS(url)
-	fmt.Println(convertToJson(feed, prettyprint))
+func convert(url string, prettyprint bool) error {
+	feed, err := fetchRSS(url)
+	if err != nil {
+		return err
+	}
+	result, err := convertToJson(feed, prettyprint)
+	if err != nil {
+		return err
+	}
+	fmt.Println(result)
+	return nil
 }
 
-func fetchRSS(url string) *gofeed.Feed {
+func fetchRSS(url string) (*gofeed.Feed, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(url)
-	if err != nil {
-		panic(err)
-	}
-	return feed
+	return feed, err
 }
 
-func convertToJson(feed *gofeed.Feed, prettyprint bool) string {
+func convertToJson(feed *gofeed.Feed, prettyprint bool) (string, error) {
 
 	if prettyprint {
-		results, _ := json.MarshalIndent(feed, "", "  ")
-		return string(results)
+		results, err := json.MarshalIndent(feed, "", "  ")
+		return string(results), err
 	}
 
-	results, _ := json.Marshal(feed)
-	return string(results)
+	results, err := json.Marshal(feed)
+	return string(results), err
 }
